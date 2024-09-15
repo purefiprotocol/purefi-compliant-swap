@@ -20,6 +20,7 @@ abstract contract PureFiBaseRouter is IUnlockCallback, Ownable {
     using StateLibrary for IPoolManager;
     using CustomRevert for bytes4;
     using TransientStateLibrary for IPoolManager;
+    using CurrencyLibrary for Currency;
 
 
     IPoolManager public immutable manager;
@@ -95,7 +96,7 @@ abstract contract PureFiBaseRouter is IUnlockCallback, Ownable {
         // short circuit for ERC-6909 burns to support ERC-6909-wrapped native tokens
         if (burn) {
             manager.burn(payer, currency.toId(), amount);
-        } else if (currency.isNative()) {
+        } else if (currency.isAddressZero()) {
             manager.settle{value: amount}();
         } else {
             manager.sync(currency);

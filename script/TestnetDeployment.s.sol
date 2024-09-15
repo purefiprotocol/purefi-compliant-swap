@@ -220,7 +220,7 @@ contract TestnetDeployment is Script {
 
     function deployTokensAndPoolManager() internal returns (MockCoin, MockCoin, IPoolManager, PoolKey memory){
         // deploy pool manager
-        IPoolManager manager = IPoolManager(new PoolManager(500_000));
+        IPoolManager manager = IPoolManager(new PoolManager());
         console.log("PoolManager:", address(manager));
 
 //        MockCoin Aur = MockCoin(0xa948e9A874a62430f4c2F74C4D7bff393Ce7F234);

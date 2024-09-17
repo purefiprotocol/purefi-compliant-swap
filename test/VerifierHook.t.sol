@@ -5,7 +5,6 @@ import "forge-std/Test.sol";
 import "forge-std/Vm.sol";
 
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
-
 import {IHooks} from "v4-core/interfaces/IHooks.sol";
 import {Hooks} from "v4-core/libraries/Hooks.sol";
 import {TickMath} from "v4-core/libraries/TickMath.sol";
@@ -308,7 +307,7 @@ contract VerifierHookTest is Test, Deployers, SignLib {
         console2.log(swapDelta.amount1());
     }
 
-    // TODO: for testing purposes, to be removed later
+
     function _validateAndDecode(
         bytes memory _purefidata, address issuerRegistry, address hook
     ) private returns (VerificationPackage memory, bytes memory) {

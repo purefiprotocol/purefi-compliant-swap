@@ -1,128 +1,81 @@
-# uniswap-v4-purefi-hook
-### **A template for writing Uniswap v4 Hooks 🦄**
+# VerifierHook for Uniswap V4
 
-[`Use this Template`](https://github.com/uniswapfoundation/v4-template/generate)
+## Overview
 
-1. The example hook [Counter.sol](src/Counter.sol) demonstrates the `beforeSwap()` and `afterSwap()` hooks
-2. The test template [Counter.t.sol](test/Counter.t.sol) preconfigures the v4 pool manager, test tokens, and test liquidity.
+VerifierHook is a compliance-focused hook designed for Uniswap V4. It implements various checks and verifications for swap operations, liquidity provisions, and donations, ensuring that all transactions meet specified compliance criteria.
 
-<details>
-<summary>Updating to v4-template:latest</summary>
+## Features
 
-This template is actively maintained -- you can update the v4 dependencies, scripts, and helpers: 
-```bash
-git remote add template https://github.com/uniswapfoundation/v4-template
-git fetch template
-git merge template/main <BRANCH> --allow-unrelated-histories
-```
+- Compliance checks using PureFi verification packages
+- Whitelist management for routers
+- Dynamic rule management for flexible compliance enforcement
+- Supports various Uniswap V4 operations including swaps, liquidity additions/removals, and donations
 
-</details>
+## Prerequisites
 
----
+- Solidity ^0.8.26
+- Uniswap V4 core and periphery contracts
+- OpenZeppelin contracts
+- PureFi SDK
 
-## Set up
+## Installation
 
-*requires [foundry](https://book.getfoundry.sh)*
+1. Clone the repository:
+   ```
+   git clone https://github.com/your-username/verifier-hook-uniswap-v4.git
+   ```
 
-```
-forge install
-forge test
-```
+2. Install dependencies:
+   ```
+   forge install
+   ```
+   
+3. Run test
 
-*Fork tests*
-```
-forge test -vv --match-path test/VerifierHook.t.sol --fork-url https://rpc.ankr.com/eth --chain-id 1 --fork-block-number 19931926
+   ```
+   forge test -vvv --match-path test/VerifierHook.t.sol --fork-url https://rpc.ankr.com/eth_sepolia --chain-id 11155111 --fork-block-number 6099766
+   ```
 
-or 
+## Contract Structure
 
-forge test -vvv --match-path test/VerifierHook.t.sol --fork-url https://rpc.ankr.com/eth_sepolia --chain-id 11155111 --fork-block-number 6099766
+The main contract is `VerifierHook.sol`, which inherits from `BaseHook` and `Ownable`. Key components include:
 
-```
+- `IPureFiVerifier`: Interface for PureFi verification
+- `PureFiMMWhitelist`: Whitelist contract for authorized market makers
+- `tokenA` and `tokenB`: IERC20 tokens for the pool
+- Mappings for expected rule IDs, router whitelist, and quoter whitelist
 
-### Local Development (Anvil)
+## Usage
 
-Other than writing unit tests (recommended!), you can only deploy & test hooks on [anvil](https://book.getfoundry.sh/anvil/)
+### Deployment
 
+Deploy the VerifierHook contract with the following parameters:
 
+- `IPoolManager _poolManager`: Uniswap V4 Pool Manager address
+- `IPureFiVerifier _verifier`: PureFi Verifier contract address
+- `IERC20 _tokenA`: Address of the first token in the pool
+- `IERC20 _tokenB`: Address of the second token in the pool
+- `PureFiMMWhitelist _whitelist`: Address of the PureFi MM Whitelist contract
+- `address _owner`: Address of the contract owner
 
-<details>
-<summary><h3>Testnets</h3></summary>
+### Key Functions
 
-NOTE: 11/21/2023, the Goerli deployment is out of sync with the latest v4. **It is recommend to use local testing instead**
+1. **Router and Quoter Management**
+   - `enlistRouter(address router)`: Whitelist a router
+   - `delistRouter(address router)`: Remove a router from the whitelist
+   - `enlistQuoter(address quoter)`: Whitelist a quoter
+   - `delistQuoter(address quoter)`: Remove a quoter from the whitelist
 
-~~For testing on Goerli Testnet the Uniswap Foundation team has deployed a slimmed down version of the V4 contract (due to current contract size limits) on the network.~~
+2. **Rule Management**
+   - `setExpectedRuleIds(uint256[] calldata ruleIds)`: Set expected rule IDs
+   - `unsetExpectedRuleId(uint256[] calldata ruleIds)`: Unset expected rule IDs
 
-~~The relevant addresses for testing on Goerli are the ones below~~
-
-```bash
-POOL_MANAGER = 0x0
-POOL_MODIFY_POSITION_TEST = 0x0
-SWAP_ROUTER = 0x0
-```
-
-Update the following command with your own private key:
-
-```
-forge script script/00_Counter.s.sol \
---rpc-url https://rpc.ankr.com/eth_goerli \
---private-key [your_private_key_on_goerli_here] \
---broadcast
-```
-
-### *Deploying your own Tokens For Testing*
-
-Because V4 is still in testing mode, most networks don't have liquidity pools live on V4 testnets. We recommend launching your own test tokens and expirementing with them that. We've included in the templace a Mock UNI and Mock USDC contract for easier testing. You can deploy the contracts and when you do you'll have 1 million mock tokens to test with for each contract. See deployment commands below
-
-```
-forge create script/mocks/mUNI.sol:MockUNI \
---rpc-url [your_rpc_url_here] \
---private-key [your_private_key_on_goerli_here]
-```
-
-```
-forge create script/mocks/mUSDC.sol:MockUSDC \
---rpc-url [your_rpc_url_here] \
---private-key [your_private_key_on_goerli_here]
-```
-
-</details>
-
----
-
-<details>
-<summary><h2>Troubleshooting</h2></summary>
+3. **Hook Operations**
+   - `beforeSwap`: Verifies PureFi data and swap parameters
+   - `afterSwap`: Performs additional checks for exact input swaps
+   - `beforeAddLiquidity`: Verifies PureFi data before liquidity addition
+   - `beforeRemoveLiquidity`: Verifies PureFi data before liquidity removal
+   - `beforeDonate`: Verifies PureFi data before donations
 
 
-
-### *Permission Denied*
-
-When installing dependencies with `forge install`, Github may throw a `Permission Denied` error
-
-Typically caused by missing Github SSH keys, and can be resolved by following the steps [here](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) 
-
-Or [adding the keys to your ssh-agent](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#adding-your-ssh-key-to-the-ssh-agent), if you have already uploaded SSH keys
-
-### Hook deployment failures
-
-Hook deployment failures are caused by incorrect flags or incorrect salt mining
-
-1. Verify the flags are in agreement:
-    * `getHookCalls()` returns the correct flags
-    * `flags` provided to `HookMiner.find(...)`
-2. Verify salt mining is correct:
-    * In **forge test**: the *deploye*r for: `new Hook{salt: salt}(...)` and `HookMiner.find(deployer, ...)` are the same. This will be `address(this)`. If using `vm.prank`, the deployer will be the pranking address
-    * In **forge script**: the deployer must be the CREATE2 Proxy: `0x4e59b44847b379578588920cA78FbF26c0B4956C`
-        * If anvil does not have the CREATE2 deployer, your foundry may be out of date. You can update it with `foundryup`
-
-</details>
-
----
-
-Additional resources:
-
-[v4-periphery](https://github.com/uniswap/v4-periphery) contains advanced hook implementations that serve as a great reference
-
-[v4-core](https://github.com/uniswap/v4-core)
-
-[v4-by-example](https://v4-by-example.org)
 

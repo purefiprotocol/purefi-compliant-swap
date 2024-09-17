@@ -2,7 +2,6 @@
 pragma solidity 0.8.26;
 
 import {BaseHook} from "v4-periphery/src/base/hooks/BaseHook.sol";
-
 import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
 import {Hooks} from "v4-core/libraries/Hooks.sol";
 import {PoolKey} from "v4-core/types/PoolKey.sol";
@@ -13,7 +12,7 @@ import "v4-core/libraries/CustomRevert.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PureFiMMWhitelist} from "./PureFiMMWhitelist.sol";
-import {IPureFiVerifier, VerificationPackage } from "./interfaces/IPureFiVerifier.sol";
+import "@purefi/sdk-solidity/interfaces/IPureFiVerifier.sol";
 
 contract VerifierHook is BaseHook, Ownable {
     using BalanceDeltaLibrary for BalanceDelta;
@@ -168,7 +167,7 @@ contract VerifierHook is BaseHook, Ownable {
     {
         if (params.amountSpecified > 0 && !quoterWhitelist[sender]) {
             (,, bytes memory encodedPackage) = abi.decode(pureFiData, (uint64, bytes, bytes));
-            VerificationPackage memory package = verifier._decodePureFiPackage(encodedPackage);
+            VerificationPackage memory package = verifier.decodePureFiPackage(encodedPackage);
             int128 amount;
             if (params.zeroForOne) {
                 amount = delta.amount0();

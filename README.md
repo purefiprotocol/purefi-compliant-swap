@@ -77,7 +77,7 @@ Deploy the VerifierHook contract with the following parameters:
    - `beforeRemoveLiquidity`: Verifies PureFi data before liquidity removal
    - `beforeDonate`: Verifies PureFi data before donations
 
-### Diagran
+### Diagram
 
 ![screenshot](Diagram.png)
 

@@ -1,4 +1,4 @@
-# VerifierHook for Uniswap V4
+# PureFi Compliant DEX based on Uniswap V4
 
 ## Overview
 
@@ -7,7 +7,7 @@ VerifierHook is a compliance-focused hook designed for Uniswap V4. It implements
 ## Features
 
 - Compliance checks using PureFi verification packages
-- Whitelist management for routers
+- Whitelist management for market makers
 - Dynamic rule management for flexible compliance enforcement
 - Supports various Uniswap V4 operations including swaps, liquidity additions/removals, and donations
 
@@ -77,5 +77,18 @@ Deploy the VerifierHook contract with the following parameters:
    - `beforeRemoveLiquidity`: Verifies PureFi data before liquidity removal
    - `beforeDonate`: Verifies PureFi data before donations
 
+### Diagran
 
+![screenshot](Diagram.png)
 
+#### Steps to success flow
+
+1. MarketMaker whitelist router on PureFiMMWhitelist contract;
+
+2. User trying to swap through PureFiSwapRouter or MarketMaker router;
+
+3. PureFiVerifier checks that payload is correct and call issuerValid() from PureFiIssuerRegistry
+
+4. If user not whitelisted - he must proceed all rule-provided operations(KYC etc.);
+
+5. When all rule based procedures successfully proceeded by user - he can make swap, modifyLiquidity, etc.
